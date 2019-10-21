@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -18,7 +19,10 @@ enum thread_status
    You can redefine this to whatever type you like. */
 typedef int tid_t;
 #define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
-
+/* A fake priority, used in priority_lock */
+#define PRIORITY_FAKE -1
+/* Lock deep level */
+#define LOCK_LEVEL 8
 /* Thread priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
@@ -100,6 +104,10 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+    int priority_recieved;
+    bool is_recieved;
+    struct list locks;
+    struct lock *lock_needed;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -125,6 +133,7 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+void thread_yield_current (struct thread *);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
@@ -132,6 +141,7 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
+void thread_set_priority_given(struct thread *, int, bool);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
