@@ -20,6 +20,7 @@
 #define PGSIZE  (1 << PGBITS)              /* Bytes in a page. */
 #define PGMASK  BITMASK(PGSHIFT, PGBITS)   /* Page offset bits (0:12). */
 
+bool is_valid_ptr(const void *);
 /* Offset within a page. */
 static inline unsigned pg_ofs (const void *va) {
   return (uintptr_t) va & PGMASK;
@@ -54,14 +55,14 @@ static inline void *pg_round_down (const void *va) {
 
 /* Returns true if VADDR is a user virtual address. */
 static inline bool
-is_user_vaddr (const void *vaddr) 
+is_user_vaddr (const void *vaddr)
 {
   return vaddr < PHYS_BASE;
 }
 
 /* Returns true if VADDR is a kernel virtual address. */
 static inline bool
-is_kernel_vaddr (const void *vaddr) 
+is_kernel_vaddr (const void *vaddr)
 {
   return vaddr >= PHYS_BASE;
 }

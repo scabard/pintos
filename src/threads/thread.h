@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
+#include "filesys/file.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -27,6 +28,22 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
+
+struct child_st {
+  tid_t c_id;
+  bool is_exit_called;
+  bool waited;
+  int child_status;
+  struct list_elem elem;
+};
+
+struct child_wt {
+  tid_t c_id;
+  int child_status;
+  bool is_terminated;
+  bool waited;
+  struct list_elem elem;
+};
 
 /* A kernel thread or user process.
 
@@ -100,6 +117,16 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+
+    tid_t p_id;
+    int child_status;
+    struct lock c_lock;
+    struct condition c_cond;
+
+    struct list child_list;
+
+    struct file *exec_file;
+
 #endif
 
     /* Owned by thread.c. */
@@ -147,5 +174,7 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+
+struct thread *getThreadById( tid_t);
 
 #endif /* threads/thread.h */
